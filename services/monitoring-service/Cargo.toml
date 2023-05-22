@@ -6,3 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+rocket = { version = "=0.5.0-rc.3", features = ["secrets", "json"] }
+monitoring-core = { path = "../../monitoring-core" }
+serde = { version = "1.0.163", features = ["derive"] }
+chrono = "0.4.24"

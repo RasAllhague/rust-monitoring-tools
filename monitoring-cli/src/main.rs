@@ -11,7 +11,13 @@ async fn main() -> anyhow::Result<()> {
 
     let system_info = SystemInformation::collect(system, hostname, os_info)?;
     
-    
+    let resp = reqwest::Client::new()
+        .post("http://127.0.0.1:8000/system-info")
+        .json(&system_info)
+        .send()
+        .await?;
+
+    println!("Statuscode: {}", resp.status());
 
     Ok(())
 }

@@ -1,9 +1,15 @@
-use std::{time::Duration, net::{Ipv4Addr, Ipv6Addr}, collections::HashMap, ffi::OsString, thread::sleep};
+use std::{
+    collections::HashMap,
+    ffi::OsString,
+    net::{Ipv4Addr, Ipv6Addr},
+    thread::sleep,
+    time::Duration,
+};
 
-use chrono::{NaiveDateTime, NaiveDate};
+use chrono::{NaiveDate, NaiveDateTime};
 use os_info::Info;
-use serde::{Serialize, Deserialize};
-use systemstat::{System, Platform, CPULoad};
+use serde::{Deserialize, Serialize};
+use systemstat::{CPULoad, Platform, System};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct SystemInformation {
@@ -119,10 +125,10 @@ pub struct SocketStatistics {
 impl SystemInformation {
     pub fn collect(system: System, hostname: OsString, os_info: Info) -> anyhow::Result<Self> {
         let mut mounts = Vec::new();
-        
+
         for fs in system.mounts()? {
             mounts.push(Filesystem::from(fs));
-        };
+        }
 
         let mut networks = HashMap::new();
 
@@ -135,13 +141,21 @@ impl SystemInformation {
         for (network, _) in system.networks()? {
             net_stats.push(NetworkStatistics::from(system.network_stats(&network)?));
         }
-    
-        let boot_time = { 
+
+        let boot_time = {
             let boot_time = system.boot_time()?;
-            NaiveDate::from_ymd_opt(boot_time.year(), boot_time.month() as u32, boot_time.day() as u32)
-                .unwrap()
-                .and_hms_opt(boot_time.hour() as u32, boot_time.minute() as u32, boot_time.second() as u32)
-                .unwrap()
+            NaiveDate::from_ymd_opt(
+                boot_time.year(),
+                boot_time.month() as u32,
+                boot_time.day() as u32,
+            )
+            .unwrap()
+            .and_hms_opt(
+                boot_time.hour() as u32,
+                boot_time.minute() as u32,
+                boot_time.second() as u32,
+            )
+            .unwrap()
         };
 
         let battery_life = match system.battery_life() {
@@ -170,14 +184,14 @@ impl SystemInformation {
 impl CpuInformation {
     pub fn collect(system: &System) -> anyhow::Result<Self> {
         let temp = system.cpu_temp()?;
-        let (cpu_loads, load_aggregate) = { 
+        let (cpu_loads, load_aggregate) = {
             let load = system.cpu_load()?;
             let aggregate = system.cpu_load_aggregate()?;
-            
+
             sleep(Duration::from_secs(1));
 
             (load.done()?, aggregate.done()?)
-        }; 
+        };
 
         let mut loads = Vec::new();
 
@@ -195,7 +209,13 @@ impl CpuInformation {
 
 impl From<CPULoad> for CpuLoad {
     fn from(value: CPULoad) -> Self {
-        Self { user: value.user, nice: value.nice, system: value.system, interrupt: value.interrupt, idle: value.idle }
+        Self {
+            user: value.user,
+            nice: value.nice,
+            system: value.system,
+            interrupt: value.interrupt,
+            idle: value.idle,
+        }
     }
 }
 

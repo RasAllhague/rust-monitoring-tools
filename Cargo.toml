@@ -1,9 +1,9 @@
 [workspace]
 members = [
     "monitoring-core",
+    "monitoring-cli",
     "bots/botlib",
     "bots/monitoring-bot",
     "services/service-lib",
-    "services/monitoring-cli",
     "services/monitoring-service",
 ]

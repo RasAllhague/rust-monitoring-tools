@@ -139,8 +139,8 @@ CREATE TABLE IF NOT EXISTS networks_statistics (
     FOREIGN KEY (system_information_id) REFERENCES system_informations(id_system_information)
 );
 
-CREATE TABLE IF NOT EXISTS networks_statistics (
-    id_network_statistics SERIAL PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS socket_statistics (
+    id_socket_statistics SERIAL PRIMARY KEY,
     system_information_id INT NOT NULL,
     tcp_sockets_in_use INT NOT NULL,
     tcp_sockets_orphaned INT NOT NULL,

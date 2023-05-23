@@ -9,3 +9,8 @@ pub mod memory_infos;
 pub mod os_infos;
 pub mod swap_infos;
 pub mod system_informations;
+pub mod filesystem_infos;
+pub mod networks;
+pub mod network_addresses;
+pub mod network_statistics;
+pub mod socket_statistics;

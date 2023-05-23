@@ -11,19 +11,20 @@ use rocket_db_pools::Database;
 use service_lib::api_key::ApiKey;
 use service_lib::api_key::ApiKeyVault;
 use service_lib::database::MonitoringDb;
+use service_lib::profile_key::ProfileKey;
 
 #[get("/")]
 fn version() -> String {
     format!("{} v.{}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"))
 }
 
-#[post("/error")]
-fn error(_key: ApiKey<'_>) -> &'static str {
+#[post("/error/<id>")]
+fn error(_key: ApiKey<'_>, id: u32) -> &'static str {
     "Hello, world!"
 }
 
-#[post("/system-info", data = "<info>")]
-async fn system_info(_key: ApiKey<'_>, mut db: Connection<MonitoringDb>, info: Json<SystemInformation>) -> std::io::Result<()> {
+#[post("/system-info/<id>", data = "<info>")]
+async fn system_info(_a_key: ApiKey<'_>, _p_key: ProfileKey<'_>, mut db: Connection<MonitoringDb>, id: u32, info: Json<SystemInformation>) -> std::io::Result<()> {
     let mut file = File::create("test.json").await?;
     file.write_all(serde_json::to_string(&info.0).unwrap().as_bytes())
         .await?;

@@ -11,3 +11,11 @@ monitoring-core = { path = "../../monitoring-core" }
 service-lib = { path = "../service-lib" }
 serde = { version = "1.0.163", features = ["derive"] }
 chrono = "0.4.24"
+
+[dependencies.sqlx]
+version = "0.6.3"
+features = ["runtime-tokio-rustls", "postgres", "chrono"]
+
+[dependencies.rocket_db_pools]
+version = "=0.1.0-rc.3"
+features = ["sqlx_postgres"]

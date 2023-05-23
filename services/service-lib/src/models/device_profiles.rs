@@ -1,7 +1,5 @@
 use chrono::NaiveDateTime;
-use rocket_db_pools::Connection;
-
-use crate::database::MonitoringDb;
+use sqlx::{Row, pool::PoolConnection, Postgres};
 
 pub struct DeviceProfile {
     pub id_device_profile: i32,
@@ -26,19 +24,26 @@ impl DeviceProfile {
         }
     }
 
-    pub async fn get(mut db: Connection<MonitoringDb>, id: i32) -> sqlx::Result<Option<Self>> {
-        let device_profile: Option<DeviceProfile> = sqlx::query_as!(
-            DeviceProfile,
-            "SELECT *
-                FROM device_profiles
-                WHERE id_device_profile = $1;",
-            id,
-        )
-        .fetch_all(&mut *db)
-        .await?
-        .into_iter()
-        .nth(0);
+    pub async fn get(db: &mut PoolConnection<Postgres>, id: i32) -> sqlx::Result<Option<Self>> {
+        let row = sqlx::query("SELECT * FROM device_profiles WHERE id_device_profile = $;1")
+            .bind(id)
+            .fetch_optional(db).await?;
 
-        Ok(device_profile)
+        if let Some(profile_row) = row {
+            return Ok(Some(DeviceProfile {
+                id_device_profile: profile_row.try_get(0)?,
+                device_name: profile_row.try_get(1)?,
+                profile_key: profile_row.try_get(2)?,
+                create_user: profile_row.try_get(3)?,
+                create_date: profile_row.try_get(4)?,
+                modify_user: profile_row.try_get(5)?,
+                modify_date: profile_row.try_get(6)?,
+            }))
+        }
+
+        return Ok(None);
     }
+
+
 }
+

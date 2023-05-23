@@ -1,7 +1,6 @@
 use rocket::{
     error,
     http::Status,
-    info,
     request::{FromRequest, Outcome},
     Request,
 };
@@ -26,7 +25,7 @@ impl<'r> FromRequest<'r> for ProfileKey<'r> {
 
     async fn from_request(req: &'r Request<'_>) -> Outcome<Self, Self::Error> {
         let r = req.guard::<Connection<MonitoringDb>>().await;
-        let conn = match r {
+        let mut conn = match r {
             rocket::outcome::Outcome::Success(s) => s,
             _ => {
                 error!("Failed to get database!");
@@ -51,7 +50,7 @@ impl<'r> FromRequest<'r> for ProfileKey<'r> {
             }
         };
 
-        if let Ok(profile) = DeviceProfile::get(conn, id as i32).await {
+        if let Ok(profile) = DeviceProfile::get(&mut *conn, id as i32).await {
             if let Some(profile) = profile {
                 /// Returns true if `key` is a valid API key string.
                 fn is_valid(key: &str, valid_key: &str) -> bool {

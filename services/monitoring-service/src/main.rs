@@ -218,9 +218,25 @@ async fn insert_network_data(
             {
                 rocket::error!("Failed to insert mount info: {why}.");
             }
-        }   
+        }
 
-        // TODO: Insert NETSTATS here 
+        if let Some(netstat) = info.net_stats.get(&network.name) {
+            if let Err(why) = network_statistics::NetworkStatistic::new(
+                id_system_info,
+                network_model.id_network,
+                netstat.rx_bytes as i64,
+                netstat.tx_bytes as i64,
+                netstat.rx_packets as i64,
+                netstat.tx_packets as i64,
+                netstat.rx_errors as i64,
+                netstat.tx_errors as i64,
+            )
+            .insert(&mut *db)
+            .await
+            {
+                rocket::error!("Failed to insert network statistics: {why}.");
+            }
+        }
     }
 
     Ok(())

@@ -22,7 +22,7 @@ pub struct SystemInformation {
     pub battery_life: Option<BatteryLife>,
     pub mounts: Vec<Filesystem>,
     pub networks: HashMap<String, Network>,
-    pub net_stats: Vec<NetworkStatistics>,
+    pub net_stats: HashMap<String, NetworkStatistics>,
     pub socket_stats: SocketStatistics,
     pub uptime: Duration,
     pub boot_time: NaiveDateTime,
@@ -136,11 +136,10 @@ impl SystemInformation {
             networks.insert(key, Network::from(value));
         }
 
-        let mut net_stats = Vec::new();
+        let mut net_stats = HashMap::new();
 
         for (network, _) in system.networks()? {
-            // TODO: Move into hashmap so you actually can know which interface has which traffic.
-            net_stats.push(NetworkStatistics::from(system.network_stats(&network)?));
+            net_stats.insert(network.clone(), NetworkStatistics::from(system.network_stats(&network)?));
         }
 
         let boot_time = {

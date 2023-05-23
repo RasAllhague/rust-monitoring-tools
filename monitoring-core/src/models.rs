@@ -53,17 +53,17 @@ pub struct LoadAverage {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Memory {
-    total: u64,
-    free: u64,
+    pub total: u64,
+    pub free: u64,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Swap {
-    total: u64,
-    free: u64,
+    pub total: u64,
+    pub free: u64,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Copy, Clone)]
 pub struct BatteryLife {
     pub remaining_capacity: f32,
     pub remaining_time: Duration,
@@ -83,7 +83,7 @@ pub struct Filesystem {
     pub fs_mounted_on: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum IpAddress {
     Empty,
     Unsupported,
@@ -139,6 +139,7 @@ impl SystemInformation {
         let mut net_stats = Vec::new();
 
         for (network, _) in system.networks()? {
+            // TODO: Move into hashmap so you actually can know which interface has which traffic.
             net_stats.push(NetworkStatistics::from(system.network_stats(&network)?));
         }
 

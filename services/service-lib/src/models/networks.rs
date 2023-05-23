@@ -18,7 +18,7 @@ impl Network {
     pub async fn insert(self, db: &mut PoolConnection<Postgres>) -> sqlx::Result<Self> {
         let row: (i32,) = sqlx::query_as(
             "INSERT INTO networks 
-            (system_info_id, name) 
+            (system_information_id, name) 
             VALUES 
             ($1, $2) RETURNING id_network;",
         )

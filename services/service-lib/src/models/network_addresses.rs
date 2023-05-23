@@ -19,10 +19,10 @@ impl NetworkAddress {
 
     pub async fn insert(self, db: &mut PoolConnection<Postgres>) -> sqlx::Result<Self> {
         let row: (i32,) = sqlx::query_as(
-            "INSERT INTO networks 
+            "INSERT INTO network_addresses 
             (network_id, address, netmask) 
             VALUES 
-            ($1, $2) RETURNING id_network_address;",
+            ($1, $2, $3) RETURNING id_network_address;",
         )
         .bind(self.network_id)
         .bind(self.address.clone())

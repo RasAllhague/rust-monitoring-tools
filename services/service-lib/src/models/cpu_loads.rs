@@ -24,7 +24,7 @@ impl CpuLoad {
     pub async fn insert(self, db: &mut PoolConnection<Postgres>) -> sqlx::Result<Self> {
         let row: (i32,) = sqlx::query_as(
             "INSERT INTO cpu_loads 
-            (user, nice, system, interrupt, idle) 
+            (\"user\", nice, system, interrupt, idle) 
             VALUES 
             ($1, $2, $3, $4, $5) RETURNING id_cpu_load;",
         )

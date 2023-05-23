@@ -3,13 +3,13 @@ use sqlx::{pool::PoolConnection, Postgres};
 pub struct LoadAverage {
     pub id_load_average: i32,
     pub system_information_id: i32,
-    pub one: i32,
-    pub five: i32,
-    pub fifteen: i32,
+    pub one: f32,
+    pub five: f32,
+    pub fifteen: f32,
 }
 
 impl LoadAverage {
-    pub fn new(system_information_id: i32, one: i32, five: i32, fifteen: i32) -> Self {
+    pub fn new(system_information_id: i32, one: f32, five: f32, fifteen: f32) -> Self {
         Self {
             id_load_average: 0,
             system_information_id,
@@ -21,7 +21,7 @@ impl LoadAverage {
 
     pub async fn insert(self, db: &mut PoolConnection<Postgres>) -> sqlx::Result<Self> {
         let row: (i32,) = sqlx::query_as(
-            "INSERT INTO cpu_core_loads 
+            "INSERT INTO load_averages 
             (system_information_id, one, five, fifteen) 
             VALUES 
             ($1, $2, $3, $4) RETURNING id_load_average;",

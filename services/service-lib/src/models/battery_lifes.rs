@@ -22,12 +22,13 @@ impl BatteryLife {
             "INSERT INTO memory_infos 
             (system_information_id, remaining_capacity, remaining_time) 
             VALUES 
-            ($1, $2, $3) RETURNING id_battery_life;")
-            .bind(self.system_information_id)
-            .bind(self.remaining_capacity)
-            .bind(self.remaining_time)
-            .fetch_one(db)
-            .await?;
+            ($1, $2, $3) RETURNING id_battery_life;",
+        )
+        .bind(self.system_information_id)
+        .bind(self.remaining_capacity)
+        .bind(self.remaining_time)
+        .fetch_one(db)
+        .await?;
 
         Ok(Self {
             id_battery_life: row.0,

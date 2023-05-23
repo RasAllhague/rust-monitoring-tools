@@ -15,7 +15,7 @@ impl LoadAverage {
             system_information_id,
             one,
             five,
-            fifteen
+            fifteen,
         }
     }
 
@@ -24,13 +24,14 @@ impl LoadAverage {
             "INSERT INTO cpu_core_loads 
             (system_information_id, one, five, fifteen) 
             VALUES 
-            ($1, $2, $3, $4) RETURNING id_load_average;")
-            .bind(self.system_information_id)
-            .bind(self.one)
-            .bind(self.five)
-            .bind(self.fifteen)
-            .fetch_one(db)
-            .await?;
+            ($1, $2, $3, $4) RETURNING id_load_average;",
+        )
+        .bind(self.system_information_id)
+        .bind(self.one)
+        .bind(self.five)
+        .bind(self.fifteen)
+        .fetch_one(db)
+        .await?;
 
         Ok(Self {
             id_load_average: row.0,

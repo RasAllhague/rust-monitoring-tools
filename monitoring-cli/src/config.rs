@@ -1,7 +1,10 @@
 use structopt::StructOpt;
 
 #[derive(Debug, StructOpt)]
-#[structopt(name = "monitoring-cli", about = "Tool for gathering and sending system information via commandline.")]
+#[structopt(
+    name = "monitoring-cli",
+    about = "Tool for gathering and sending system information via commandline."
+)]
 pub enum Opt {
     Error {
         #[structopt(short, long)]
@@ -30,5 +33,5 @@ pub enum Opt {
         id: u32,
         #[structopt(short, long)]
         profile_key: String,
-    }
+    },
 }

@@ -22,12 +22,13 @@ impl SwapInfo {
             "INSERT INTO swap_infos 
             (system_information_id, free, total) 
             VALUES 
-            ($1, $2, $3) RETURNING id_swap_info;")
-            .bind(self.system_information_id)
-            .bind(self.free)
-            .bind(self.total)
-            .fetch_one(db)
-            .await?;
+            ($1, $2, $3) RETURNING id_swap_info;",
+        )
+        .bind(self.system_information_id)
+        .bind(self.free)
+        .bind(self.total)
+        .fetch_one(db)
+        .await?;
 
         Ok(Self {
             id_swap_info: row.0,

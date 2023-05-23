@@ -38,16 +38,17 @@ impl OsInfo {
             "INSERT INTO os_infos 
             (system_information_id, os_type, version, edition, codename, bitness, architecture) 
             VALUES 
-            ($1, $2, $3, $4, $5, $6, $7) RETURNING id_os_info;")
-            .bind(self.system_information_id)
-            .bind(self.os_type.clone())
-            .bind(self.version.clone())
-            .bind(self.edition.clone())
-            .bind(self.codename.clone())
-            .bind(self.bitness.clone())
-            .bind(self.architecture.clone())
-            .fetch_one(db)
-            .await?;
+            ($1, $2, $3, $4, $5, $6, $7) RETURNING id_os_info;",
+        )
+        .bind(self.system_information_id)
+        .bind(self.os_type.clone())
+        .bind(self.version.clone())
+        .bind(self.edition.clone())
+        .bind(self.codename.clone())
+        .bind(self.bitness.clone())
+        .bind(self.architecture.clone())
+        .fetch_one(db)
+        .await?;
 
         Ok(Self {
             id_os_info: row.0,

@@ -26,14 +26,15 @@ impl CpuLoad {
             "INSERT INTO cpu_loads 
             (user, nice, system, interrupt, idle) 
             VALUES 
-            ($1, $2, $3, $4, $5) RETURNING id_cpu_load;")
-            .bind(self.user)
-            .bind(self.nice)
-            .bind(self.system)
-            .bind(self.interrupt)
-            .bind(self.idle)
-            .fetch_one(db)
-            .await?;
+            ($1, $2, $3, $4, $5) RETURNING id_cpu_load;",
+        )
+        .bind(self.user)
+        .bind(self.nice)
+        .bind(self.system)
+        .bind(self.interrupt)
+        .bind(self.idle)
+        .fetch_one(db)
+        .await?;
 
         Ok(Self {
             id_cpu_load: row.0,

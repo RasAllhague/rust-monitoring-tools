@@ -22,12 +22,13 @@ impl MemoryInfo {
             "INSERT INTO memory_infos 
             (system_information_id, free, total) 
             VALUES 
-            ($1, $2, $3) RETURNING id_memory_info;")
-            .bind(self.system_information_id)
-            .bind(self.free)
-            .bind(self.total)
-            .fetch_one(db)
-            .await?;
+            ($1, $2, $3) RETURNING id_memory_info;",
+        )
+        .bind(self.system_information_id)
+        .bind(self.free)
+        .bind(self.total)
+        .fetch_one(db)
+        .await?;
 
         Ok(Self {
             id_memory_info: row.0,

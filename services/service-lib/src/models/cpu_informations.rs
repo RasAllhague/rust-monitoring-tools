@@ -12,8 +12,8 @@ impl CpuInformation {
         Self {
             id_cpu_information: 0,
             system_information_id,
-            temperature, 
-            aggregate_load_id
+            temperature,
+            aggregate_load_id,
         }
     }
 
@@ -22,12 +22,13 @@ impl CpuInformation {
             "INSERT INTO cpu_informations 
             (system_information_id, temperature, aggregate_load_id) 
             VALUES 
-            ($1, $2, $3) RETURNING id_cpu_information;")
-            .bind(self.system_information_id)
-            .bind(self.temperature)
-            .bind(self.aggregate_load_id)
-            .fetch_one(db)
-            .await?;
+            ($1, $2, $3) RETURNING id_cpu_information;",
+        )
+        .bind(self.system_information_id)
+        .bind(self.temperature)
+        .bind(self.aggregate_load_id)
+        .fetch_one(db)
+        .await?;
 
         Ok(Self {
             id_cpu_information: row.0,

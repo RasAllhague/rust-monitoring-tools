@@ -20,11 +20,12 @@ impl CpuCoreLoad {
             "INSERT INTO cpu_core_loads 
             (cpu_information_id, cpu_load_id) 
             VALUES 
-            ($1, $2) RETURNING id_cpu_core_load;")
-            .bind(self.cpu_information_id)
-            .bind(self.cpu_load_id)
-            .fetch_one(db)
-            .await?;
+            ($1, $2) RETURNING id_cpu_core_load;",
+        )
+        .bind(self.cpu_information_id)
+        .bind(self.cpu_load_id)
+        .fetch_one(db)
+        .await?;
 
         Ok(Self {
             id_cpu_core_load: row.0,

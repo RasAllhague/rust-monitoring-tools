@@ -5,3 +5,7 @@ pub mod os_infos;
 pub mod cpu_loads;
 pub mod cpu_informations;
 pub mod cpu_core_loads;
+pub mod load_averages;
+pub mod memory_infos;
+pub mod swap_infos;
+pub mod battery_lifes;

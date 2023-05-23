@@ -26,7 +26,7 @@ impl SocketStatistic {
             tcp6_sockets_in_use,
             tcp_sockets_orphaned,
             udp6_sockets_in_use,
-            udp_sockets_in_use
+            udp_sockets_in_use,
         }
     }
 

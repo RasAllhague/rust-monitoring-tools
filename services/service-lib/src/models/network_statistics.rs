@@ -12,7 +12,15 @@ pub struct NetworkStatistic {
 }
 
 impl NetworkStatistic {
-    pub fn new(system_information_id: i32, rx_bytes: i64, tx_bytes: i64, rx_packages: i64, tx_packages: i64, rx_errors: i64, tx_errors: i64) -> Self {
+    pub fn new(
+        system_information_id: i32,
+        rx_bytes: i64,
+        tx_bytes: i64,
+        rx_packages: i64,
+        tx_packages: i64,
+        rx_errors: i64,
+        tx_errors: i64,
+    ) -> Self {
         Self {
             id_network_statistics: 0,
             system_information_id,
@@ -21,7 +29,7 @@ impl NetworkStatistic {
             rx_packages,
             tx_packages,
             rx_errors,
-            tx_errors
+            tx_errors,
         }
     }
 

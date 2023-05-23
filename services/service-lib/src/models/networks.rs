@@ -3,7 +3,7 @@ use sqlx::{pool::PoolConnection, Postgres};
 pub struct Network {
     pub id_network: i32,
     pub system_information_id: i32,
-    pub name: String,   
+    pub name: String,
 }
 
 impl Network {

@@ -25,7 +25,7 @@ impl DeviceProfile {
     }
 
     pub async fn get(db: &mut PoolConnection<Postgres>, id: i32) -> sqlx::Result<Option<Self>> {
-        let row = sqlx::query("SELECT * FROM device_profiles WHERE id_device_profile = $;1")
+        let row = sqlx::query("SELECT * FROM device_profiles WHERE id_device_profile = $1;")
             .bind(id)
             .fetch_optional(db).await?;
 

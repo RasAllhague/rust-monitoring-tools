@@ -52,7 +52,6 @@ impl<'r> FromRequest<'r> for ProfileKey<'r> {
 
         if let Ok(profile) = DeviceProfile::get(&mut *conn, id as i32).await {
             if let Some(profile) = profile {
-                /// Returns true if `key` is a valid API key string.
                 fn is_valid(key: &str, valid_key: &str) -> bool {
                     key == valid_key
                 }

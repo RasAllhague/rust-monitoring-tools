@@ -1110,6 +1110,7 @@ dependencies = [
 name = "monitoring-service"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "chrono",
  "monitoring-core",
  "rocket",

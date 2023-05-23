@@ -11,6 +11,7 @@ monitoring-core = { path = "../../monitoring-core" }
 service-lib = { path = "../service-lib" }
 serde = { version = "1.0.163", features = ["derive"] }
 chrono = "0.4.24"
+anyhow = "1.0.71"
 
 [dependencies.sqlx]
 version = "0.6.3"

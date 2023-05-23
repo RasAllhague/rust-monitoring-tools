@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS system_informations (
     id_system_information SERIAL PRIMARY KEY,
     device_profile_id INT NOT NULL,
     hostname VARCHAR(255) NOT NULL,
-    uptime INT NOT NULL,
+    uptime BIGINT NOT NULL,
     boot_time TIMESTAMP NOT NULL,
     create_date TIMESTAMP NOT NULL,
     FOREIGN KEY (device_profile_id) REFERENCES device_profiles(id_device_profile)

@@ -43,7 +43,5 @@ impl DeviceProfile {
 
         return Ok(None);
     }
-
-
 }
 

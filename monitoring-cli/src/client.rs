@@ -1,18 +1,16 @@
 use monitoring_core::{models::SystemInformation, ErrorLog};
-use reqwest::{StatusCode};
+use reqwest::StatusCode;
 use serde::Serialize;
 
 use crate::{config::ClientConfig, error::CliError};
 
 pub struct SysInfoClient {
-    config: ClientConfig,    
+    config: ClientConfig,
 }
 
 impl SysInfoClient {
     pub fn new(config: ClientConfig) -> Self {
-        Self {
-            config
-        }
+        Self { config }
     }
 
     pub async fn get_version(&self) -> Result<String, CliError> {
@@ -21,7 +19,8 @@ impl SysInfoClient {
             .header("x-api-key", self.config.api_key.clone())
             .header("x-profile-key", self.config.profile_key.clone())
             .send()
-            .await.map_err(|x| CliError::Reqwest(x))?;
+            .await
+            .map_err(|x| CliError::Reqwest(x))?;
 
         let version = resp.text().await.map_err(|x| CliError::Reqwest(x))?;
 
@@ -38,12 +37,16 @@ impl SysInfoClient {
 
     async fn post<T: Serialize>(&self, sub_path: &str, data: T) -> Result<StatusCode, CliError> {
         let resp = reqwest::Client::new()
-            .post(format!("{}/{}/{}", self.config.server_url, sub_path, self.config.profile_id))
+            .post(format!(
+                "{}/{}/{}",
+                self.config.server_url, sub_path, self.config.profile_id
+            ))
             .header("x-api-key", self.config.api_key.clone())
             .header("x-profile-key", self.config.profile_key.clone())
             .json(&data)
             .send()
-            .await.map_err(|x| CliError::Reqwest(x))?;
+            .await
+            .map_err(|x| CliError::Reqwest(x))?;
 
         Ok(resp.status())
     }

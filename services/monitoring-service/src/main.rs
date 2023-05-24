@@ -10,21 +10,21 @@ use rocket_db_pools::Database;
 use service_lib::api_key::ApiKey;
 use service_lib::api_key::ApiKeyVault;
 use service_lib::database::MonitoringDb;
+use service_lib::models::battery_lifes;
 use service_lib::models::cpu_core_loads;
 use service_lib::models::cpu_informations;
 use service_lib::models::cpu_loads;
 use service_lib::models::error_logs::ErrorLog;
+use service_lib::models::filesystem_infos;
 use service_lib::models::load_averages;
 use service_lib::models::memory_infos;
-use service_lib::models::os_infos;
-use service_lib::models::swap_infos;
-use service_lib::models::system_informations;
-use service_lib::models::battery_lifes;
-use service_lib::models::filesystem_infos;
-use service_lib::models::networks;
 use service_lib::models::network_addresses;
 use service_lib::models::network_statistics;
+use service_lib::models::networks;
+use service_lib::models::os_infos;
 use service_lib::models::socket_statistics;
+use service_lib::models::swap_infos;
+use service_lib::models::system_informations;
 use service_lib::profile_key::ProfileKey;
 use sqlx::pool::PoolConnection;
 use sqlx::Postgres;
@@ -85,9 +85,7 @@ async fn system_info(
                 os.edition().and_then(|s| Some(String::from(s))),
                 os.codename().and_then(|s| Some(String::from(s))),
                 &os.bitness().to_string(),
-                os
-                    .architecture()
-                    .and_then(|s| Some(String::from(s))),
+                os.architecture().and_then(|s| Some(String::from(s))),
             )
             .insert(&mut *db)
             .await
@@ -95,7 +93,7 @@ async fn system_info(
                 rocket::error!("Failed to insert os info: {why}.");
             }
         }
-        
+
         if let Err(why) =
             insert_cpu_data(system_info_model.id_system_information, &info, &mut *db).await
         {
@@ -128,7 +126,7 @@ async fn system_info(
                 rocket::error!("Failed to insert memory info: {why}.");
             }
         }
-        
+
         if let Some(swap) = &info.swap {
             if let Err(why) = swap_infos::SwapInfo::new(
                 system_info_model.id_system_information,
@@ -166,7 +164,7 @@ async fn system_info(
                 mount.name_max as i32,
                 &mount.fs_type,
                 &mount.fs_mounted_from,
-                &mount.fs_mounted_on
+                &mount.fs_mounted_on,
             )
             .insert(&mut *db)
             .await
@@ -188,7 +186,7 @@ async fn system_info(
                 sock.tcp_sockets_orphaned as i32,
                 sock.udp_sockets_in_use as i32,
                 sock.tcp6_sockets_in_use as i32,
-                sock.udp6_sockets_in_use as i32
+                sock.udp6_sockets_in_use as i32,
             )
             .insert(&mut *db)
             .await
@@ -196,7 +194,7 @@ async fn system_info(
                 rocket::error!("Failed to insert load averages: {why}.");
             }
         }
-            
+
         rocket::info!("Inserted new system info for profile '{profile_id}'.");
         return Status::Ok;
     }
@@ -210,18 +208,15 @@ async fn insert_network_data(
     db: &mut PoolConnection<Postgres>,
 ) -> Result<(), sqlx::Error> {
     for (interface, network) in info.networks.iter() {
-        let network_model = networks::Network::new(
-            id_system_info,
-            &interface
-        )
-        .insert(&mut *db)
-        .await?;
+        let network_model = networks::Network::new(id_system_info, &interface)
+            .insert(&mut *db)
+            .await?;
 
         for addr in network.addrs.iter() {
             if let Err(why) = network_addresses::NetworkAddress::new(
                 network_model.id_network,
                 &ip_to_string(addr.addr.clone()),
-               &ip_to_string(addr.netmask.clone()),
+                &ip_to_string(addr.netmask.clone()),
             )
             .insert(&mut *db)
             .await
@@ -254,7 +249,6 @@ async fn insert_network_data(
 
 fn ip_to_string(ip: IpAddress) -> String {
     match ip {
- 
         IpAddress::Empty => String::new(),
         IpAddress::Unsupported => String::from("Unsupported"),
         IpAddress::V4(v4) => v4.to_string(),
@@ -277,7 +271,7 @@ async fn insert_cpu_data(
         )
         .insert(&mut *db)
         .await?;
-    
+
         let cpu_info = cpu_informations::CpuInformation::new(
             id_system_info,
             cpu.temperature,
@@ -285,7 +279,7 @@ async fn insert_cpu_data(
         )
         .insert(&mut *db)
         .await?;
-    
+
         for cpu_load in cpu.loads.iter() {
             let core_load = cpu_loads::CpuLoad::new(
                 cpu_load.user,
@@ -296,13 +290,13 @@ async fn insert_cpu_data(
             )
             .insert(&mut *db)
             .await?;
-    
+
             cpu_core_loads::CpuCoreLoad::new(cpu_info.id_cpu_information, core_load.id_cpu_load)
                 .insert(&mut *db)
                 .await?;
         }
     }
-    
+
     Ok(())
 }
 

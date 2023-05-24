@@ -125,7 +125,12 @@ pub struct SocketStatistics {
 }
 
 impl SystemInformation {
-    pub fn collect(options: &CollectorOptions, system: System, hostname: OsString, os_info: Option<Info>) -> anyhow::Result<Self> {
+    pub fn collect(
+        options: &CollectorOptions,
+        system: System,
+        hostname: OsString,
+        os_info: Option<Info>,
+    ) -> anyhow::Result<Self> {
         let mut mounts = Vec::new();
 
         if options.filesystem() {
@@ -133,7 +138,7 @@ impl SystemInformation {
                 mounts.push(Filesystem::from(fs));
             }
         }
-        
+
         let mut networks = HashMap::new();
 
         if options.network() {
@@ -141,19 +146,21 @@ impl SystemInformation {
                 networks.insert(key, Network::from(value));
             }
         }
-        
+
         let mut net_stats = HashMap::new();
-        
+
         if options.network() {
             for (network, _) in system.networks()? {
-                net_stats.insert(network.clone(), NetworkStatistics::from(system.network_stats(&network)?));
+                net_stats.insert(
+                    network.clone(),
+                    NetworkStatistics::from(system.network_stats(&network)?),
+                );
             }
         }
-        
+
         let socket_stats = if options.network() {
             Some(SocketStatistics::from(system.socket_stats()?))
-        }
-        else {
+        } else {
             None
         };
 
@@ -179,23 +186,23 @@ impl SystemInformation {
         };
 
         let (cpu, load_avg) = if options.cpu() {
-            (Some(CpuInformation::collect(&system)?), Some(LoadAverage::from(system.load_average()?)))
-        }
-        else {
+            (
+                Some(CpuInformation::collect(&system)?),
+                Some(LoadAverage::from(system.load_average()?)),
+            )
+        } else {
             (None, None)
         };
 
         let swap = if options.swap() {
             Some(Swap::from(system.swap()?))
-        }
-        else {
+        } else {
             None
         };
 
         let memory = if options.memory() {
             Some(Memory::from(system.memory()?))
-        }
-        else {
+        } else {
             None
         };
 

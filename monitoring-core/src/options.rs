@@ -1,23 +1,30 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct CollectorOptions {
-    cpu: bool, 
-    memory: bool, 
-    os: bool, 
-    network: bool, 
-    filesystem: bool, 
-    swap: bool
+    cpu: bool,
+    memory: bool,
+    os: bool,
+    network: bool,
+    filesystem: bool,
+    swap: bool,
 }
 
 impl CollectorOptions {
-    pub fn new(cpu: bool, memory: bool, os: bool, network: bool, filesystem: bool, swap: bool) -> Self {
+    pub fn new(
+        cpu: bool,
+        memory: bool,
+        os: bool,
+        network: bool,
+        filesystem: bool,
+        swap: bool,
+    ) -> Self {
         Self {
-            cpu, 
-            memory, 
-            os, 
-            network, 
-            filesystem, 
+            cpu,
+            memory,
+            os,
+            network,
+            filesystem,
             swap,
         }
     }

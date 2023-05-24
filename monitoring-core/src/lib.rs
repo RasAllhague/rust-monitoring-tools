@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 pub mod models;
+pub mod options;
 
 #[derive(Serialize, Deserialize)]
 pub struct ErrorLog {

@@ -11,19 +11,21 @@ use os_info::Info;
 use serde::{Deserialize, Serialize};
 use systemstat::{CPULoad, Platform, System};
 
+use crate::options::CollectorOptions;
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct SystemInformation {
     pub hostname: OsString,
-    pub os_info: Info,
-    pub cpu: CpuInformation,
-    pub load_avg: LoadAverage,
-    pub memory: Memory,
-    pub swap: Swap,
+    pub os_info: Option<Info>,
+    pub cpu: Option<CpuInformation>,
+    pub load_avg: Option<LoadAverage>,
+    pub memory: Option<Memory>,
+    pub swap: Option<Swap>,
     pub battery_life: Option<BatteryLife>,
     pub mounts: Vec<Filesystem>,
     pub networks: HashMap<String, Network>,
     pub net_stats: HashMap<String, NetworkStatistics>,
-    pub socket_stats: SocketStatistics,
+    pub socket_stats: Option<SocketStatistics>,
     pub uptime: Duration,
     pub boot_time: NaiveDateTime,
 }
@@ -123,24 +125,37 @@ pub struct SocketStatistics {
 }
 
 impl SystemInformation {
-    pub fn collect(system: System, hostname: OsString, os_info: Info) -> anyhow::Result<Self> {
+    pub fn collect(options: &CollectorOptions, system: System, hostname: OsString, os_info: Option<Info>) -> anyhow::Result<Self> {
         let mut mounts = Vec::new();
 
-        for fs in system.mounts()? {
-            mounts.push(Filesystem::from(fs));
+        if options.filesystem() {
+            for fs in system.mounts()? {
+                mounts.push(Filesystem::from(fs));
+            }
         }
-
+        
         let mut networks = HashMap::new();
 
-        for (key, value) in system.networks()? {
-            networks.insert(key, Network::from(value));
+        if options.network() {
+            for (key, value) in system.networks()? {
+                networks.insert(key, Network::from(value));
+            }
         }
-
+        
         let mut net_stats = HashMap::new();
-
-        for (network, _) in system.networks()? {
-            net_stats.insert(network.clone(), NetworkStatistics::from(system.network_stats(&network)?));
+        
+        if options.network() {
+            for (network, _) in system.networks()? {
+                net_stats.insert(network.clone(), NetworkStatistics::from(system.network_stats(&network)?));
+            }
         }
+        
+        let socket_stats = if options.network() {
+            Some(SocketStatistics::from(system.socket_stats()?))
+        }
+        else {
+            None
+        };
 
         let boot_time = {
             let boot_time = system.boot_time()?;
@@ -163,18 +178,39 @@ impl SystemInformation {
             Err(_) => None,
         };
 
+        let (cpu, load_avg) = if options.cpu() {
+            (Some(CpuInformation::collect(&system)?), Some(LoadAverage::from(system.load_average()?)))
+        }
+        else {
+            (None, None)
+        };
+
+        let swap = if options.swap() {
+            Some(Swap::from(system.swap()?))
+        }
+        else {
+            None
+        };
+
+        let memory = if options.memory() {
+            Some(Memory::from(system.memory()?))
+        }
+        else {
+            None
+        };
+
         Ok(Self {
             hostname,
             os_info,
-            cpu: CpuInformation::collect(&system)?,
-            load_avg: LoadAverage::from(system.load_average()?),
-            memory: Memory::from(system.memory()?),
-            swap: Swap::from(system.swap()?),
+            cpu,
+            load_avg,
+            memory,
+            swap,
             battery_life: battery_life,
             mounts,
             networks,
             net_stats,
-            socket_stats: SocketStatistics::from(system.socket_stats()?),
+            socket_stats: socket_stats,
             uptime: system.uptime()?,
             boot_time: boot_time,
         })

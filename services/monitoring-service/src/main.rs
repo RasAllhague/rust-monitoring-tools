@@ -77,61 +77,69 @@ async fn system_info(
     .insert(&mut *db)
     .await
     {
-        if let Err(why) = os_infos::OsInfo::new(
-            system_info_model.id_system_information,
-            &info.os_info.os_type().to_string(),
-            &info.os_info.version().to_string(),
-            info.os_info.edition().and_then(|s| Some(String::from(s))),
-            info.os_info.codename().and_then(|s| Some(String::from(s))),
-            &info.os_info.bitness().to_string(),
-            info.os_info
-                .architecture()
-                .and_then(|s| Some(String::from(s))),
-        )
-        .insert(&mut *db)
-        .await
-        {
-            rocket::error!("Failed to insert os info: {why}.");
+        if let Some(os) = &info.os_info {
+            if let Err(why) = os_infos::OsInfo::new(
+                system_info_model.id_system_information,
+                &os.os_type().to_string(),
+                &os.version().to_string(),
+                os.edition().and_then(|s| Some(String::from(s))),
+                os.codename().and_then(|s| Some(String::from(s))),
+                &os.bitness().to_string(),
+                os
+                    .architecture()
+                    .and_then(|s| Some(String::from(s))),
+            )
+            .insert(&mut *db)
+            .await
+            {
+                rocket::error!("Failed to insert os info: {why}.");
+            }
         }
-
+        
         if let Err(why) =
             insert_cpu_data(system_info_model.id_system_information, &info, &mut *db).await
         {
             rocket::error!("Failed to insert cpu infos: {why}.");
         }
 
-        if let Err(why) = load_averages::LoadAverage::new(
-            system_info_model.id_system_information,
-            info.load_avg.one,
-            info.load_avg.five,
-            info.load_avg.fifteen,
-        )
-        .insert(&mut *db)
-        .await
-        {
-            rocket::error!("Failed to insert load averages: {why}.");
+        if let Some(l_avg) = &info.load_avg {
+            if let Err(why) = load_averages::LoadAverage::new(
+                system_info_model.id_system_information,
+                l_avg.one,
+                l_avg.five,
+                l_avg.fifteen,
+            )
+            .insert(&mut *db)
+            .await
+            {
+                rocket::error!("Failed to insert load averages: {why}.");
+            }
         }
 
-        if let Err(why) = memory_infos::MemoryInfo::new(
-            system_info_model.id_system_information,
-            info.memory.free as i64,
-            info.memory.total as i64,
-        )
-        .insert(&mut *db)
-        .await
-        {
-            rocket::error!("Failed to insert memory info: {why}.");
+        if let Some(mem) = &info.memory {
+            if let Err(why) = memory_infos::MemoryInfo::new(
+                system_info_model.id_system_information,
+                mem.free as i64,
+                mem.total as i64,
+            )
+            .insert(&mut *db)
+            .await
+            {
+                rocket::error!("Failed to insert memory info: {why}.");
+            }
         }
-
-        if let Err(why) = swap_infos::SwapInfo::new(
-            system_info_model.id_system_information,
-            info.swap.free as i64,
-            info.swap.total as i64,
-        )
-        .insert(&mut *db)
-        .await
-        {
-            rocket::error!("Failed to insert swap info: {why}.");
+        
+        if let Some(swap) = &info.swap {
+            if let Err(why) = swap_infos::SwapInfo::new(
+                system_info_model.id_system_information,
+                swap.free as i64,
+                swap.total as i64,
+            )
+            .insert(&mut *db)
+            .await
+            {
+                rocket::error!("Failed to insert swap info: {why}.");
+            }
         }
 
         if let Some(battery_life) = info.battery_life {
@@ -173,20 +181,22 @@ async fn system_info(
             rocket::error!("Failed to insert network infos: {why}.");
         }
 
-        if let Err(why) = socket_statistics::SocketStatistic::new(
-            system_info_model.id_system_information,
-            info.socket_stats.tcp_sockets_in_use as i32,
-            info.socket_stats.tcp_sockets_orphaned as i32,
-            info.socket_stats.udp_sockets_in_use as i32,
-            info.socket_stats.tcp6_sockets_in_use as i32,
-            info.socket_stats.udp6_sockets_in_use as i32
-        )
-        .insert(&mut *db)
-        .await
-        {
-            rocket::error!("Failed to insert load averages: {why}.");
+        if let Some(sock) = &info.socket_stats {
+            if let Err(why) = socket_statistics::SocketStatistic::new(
+                system_info_model.id_system_information,
+                sock.tcp_sockets_in_use as i32,
+                sock.tcp_sockets_orphaned as i32,
+                sock.udp_sockets_in_use as i32,
+                sock.tcp6_sockets_in_use as i32,
+                sock.udp6_sockets_in_use as i32
+            )
+            .insert(&mut *db)
+            .await
+            {
+                rocket::error!("Failed to insert load averages: {why}.");
+            }
         }
-
+            
         rocket::info!("Inserted new system info for profile '{profile_id}'.");
         return Status::Ok;
     }
@@ -257,40 +267,42 @@ async fn insert_cpu_data(
     info: &Json<monitoring_core::models::SystemInformation>,
     db: &mut PoolConnection<Postgres>,
 ) -> Result<(), sqlx::Error> {
-    let aggregate_load = cpu_loads::CpuLoad::new(
-        info.cpu.aggregate_load.user,
-        info.cpu.aggregate_load.nice,
-        info.cpu.aggregate_load.system,
-        info.cpu.aggregate_load.interrupt,
-        info.cpu.aggregate_load.idle,
-    )
-    .insert(&mut *db)
-    .await?;
-
-    let cpu_info = cpu_informations::CpuInformation::new(
-        id_system_info,
-        info.cpu.temperature,
-        aggregate_load.id_cpu_load,
-    )
-    .insert(&mut *db)
-    .await?;
-
-    for cpu_load in info.cpu.loads.iter() {
-        let core_load = cpu_loads::CpuLoad::new(
-            cpu_load.user,
-            cpu_load.nice,
-            cpu_load.system,
-            cpu_load.interrupt,
-            cpu_load.idle,
+    if let Some(cpu) = &info.cpu {
+        let aggregate_load = cpu_loads::CpuLoad::new(
+            cpu.aggregate_load.user,
+            cpu.aggregate_load.nice,
+            cpu.aggregate_load.system,
+            cpu.aggregate_load.interrupt,
+            cpu.aggregate_load.idle,
         )
         .insert(&mut *db)
         .await?;
-
-        cpu_core_loads::CpuCoreLoad::new(cpu_info.id_cpu_information, core_load.id_cpu_load)
+    
+        let cpu_info = cpu_informations::CpuInformation::new(
+            id_system_info,
+            cpu.temperature,
+            aggregate_load.id_cpu_load,
+        )
+        .insert(&mut *db)
+        .await?;
+    
+        for cpu_load in cpu.loads.iter() {
+            let core_load = cpu_loads::CpuLoad::new(
+                cpu_load.user,
+                cpu_load.nice,
+                cpu_load.system,
+                cpu_load.interrupt,
+                cpu_load.idle,
+            )
             .insert(&mut *db)
             .await?;
+    
+            cpu_core_loads::CpuCoreLoad::new(cpu_info.id_cpu_information, core_load.id_cpu_load)
+                .insert(&mut *db)
+                .await?;
+        }
     }
-
+    
     Ok(())
 }
 

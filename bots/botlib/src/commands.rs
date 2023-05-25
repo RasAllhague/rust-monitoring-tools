@@ -1,5 +1,4 @@
 use async_trait::async_trait;
-use monitoring_core::client::SysInfoClient;
 use serenity::{
     builder::{CreateApplicationCommands},
     model::prelude::interaction::application_command::ApplicationCommandInteraction,
@@ -21,7 +20,6 @@ pub trait SlashCommand: Send + Sync {
         &self,
         command: &ApplicationCommandInteraction,
         ctx: &Context,
-        client: &SysInfoClient,
         config: &Self::Config,
     ) -> Result<(), CommandError>;
     fn name(&self) -> String;

@@ -6,6 +6,8 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+monitoring-core = { path = "../../monitoring-core" }
+botlib = { path = "../botlib" }
 tracing = "0.1.37"
 tracing-subscriber = "0.3.16"
 tokio = { version = "1.26.0", features = ["macros", "rt-multi-thread", "fs"] }

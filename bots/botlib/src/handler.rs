@@ -1,26 +1,22 @@
 use std::sync::Arc;
 
 use async_trait::async_trait;
-use monitoring_core::client::SysInfoClient;
 use serenity::{prelude::{EventHandler, Context}, model::prelude::{ResumedEvent, Ready, command::Command, interaction::Interaction}};
 use tracing::{log::{error, info, debug}, instrument};
 
 use crate::{commands::SlashCommand, logger::CommandUsageLogger};
 
 pub struct BotHandler<T: Clone + Sync + Send> {
-    pub client: SysInfoClient,
     pub commands: Vec<Arc<dyn SlashCommand<Config = T>>>,
     pub config: T,
 }
 
 impl<T: Clone + Sync + Send> BotHandler<T> {
     pub fn new(
-        client: SysInfoClient,
         commands: &[Arc<dyn SlashCommand<Config = T>>],
         config: T,
     ) -> Self {
         Self {
-            client,
             commands: commands.into(),
             config,
         }
@@ -49,7 +45,7 @@ impl<T: Clone + Sync + Send> EventHandler for BotHandler<T> {
                 }
 
                 if let Err(why) = command
-                    .dispatch(&command_interaction, &ctx, &self.client, &self.config)
+                    .dispatch(&command_interaction, &ctx, &self.config)
                     .await
                 {
                     error!("Error during command interaction: {:?}", why);

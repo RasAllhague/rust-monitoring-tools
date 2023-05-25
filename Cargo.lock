@@ -250,6 +250,14 @@ dependencies = [
 [[package]]
 name = "botlib"
 version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "chrono",
+ "monitoring-core",
+ "serenity",
+ "tracing",
+ "tracing-subscriber",
+]
 
 [[package]]
 name = "bumpalo"

@@ -12,7 +12,7 @@ use serenity::{
     prelude::Context,
 };
 use tokio::fs::read_dir;
-use tracing::log::info;
+use tracing::log::{info, warn};
 
 use crate::config::BotConfig;
 
@@ -59,9 +59,10 @@ impl SlashCommand for ProfileCommand {
             "create" => run_create(command, ctx, config).await,
             "view" => run_view(command, ctx, config).await,
             _ => {
+                warn!("Invalid command option found!");
                 command
                     .edit_original_interaction_response(ctx, |m| {
-                        m.content("Invalid command option")
+                        m.content("Invalid command option!")
                     })
                     .await?;
 
@@ -117,21 +118,8 @@ pub async fn run_create(
     let client_config = ClientConfig::new(config.api_token(), config.server_url());
     let client = SysInfoClient::new(client_config);
 
-    
-
-    Ok(())
-}
-
-pub async fn run_view(
-    command: &ApplicationCommandInteraction,
-    ctx: &Context,
-    config: &BotConfig,
-) -> Result<(), CommandError> {
-    let client_config = ClientConfig::new(config.api_token(), config.server_url());
-    let client = SysInfoClient::new(client_config);
-
-    let device_name = PositionalOptionParser::parse_string(&command.data.options, 0)?;
-    let profile_key = PositionalOptionParser::parse_string(&command.data.options, 1)?;
+    let device_name = PositionalOptionParser::parse_string(&command.data.options[0].options, 0)?;
+    let profile_key = PositionalOptionParser::parse_string(&command.data.options[0].options, 1)?;
 
     let insert_profile = InsertDeviceProfile {
         device_name,
@@ -146,6 +134,18 @@ pub async fn run_view(
             m.content("Created new device profile!")
         })
         .await?;
+
+    Ok(())
+
+}
+
+pub async fn run_view(
+    command: &ApplicationCommandInteraction,
+    ctx: &Context,
+    config: &BotConfig,
+) -> Result<(), CommandError> {
+    let client_config = ClientConfig::new(config.api_token(), config.server_url());
+    let client = SysInfoClient::new(client_config);
 
     Ok(())
 }

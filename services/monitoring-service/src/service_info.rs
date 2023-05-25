@@ -4,6 +4,7 @@ use rocket::http::Status;
 use rocket::serde::json::Json;
 use rocket::{get, post};
 use rocket_db_pools::Connection;
+use serde::{Serialize, Deserialize};
 use service_lib::api_key::ApiKey;
 use service_lib::database::MonitoringDb;
 use service_lib::models::battery_lifes;
@@ -19,19 +20,25 @@ use service_lib::models::networks;
 use service_lib::models::os_infos;
 use service_lib::models::socket_statistics;
 use service_lib::models::swap_infos;
-use service_lib::models::system_informations;
+use service_lib::models::system_informations::{self, SystemInformation};
 use service_lib::profile_key::ProfileKey;
+use service_lib::read_key::ReadKey;
 use sqlx::pool::PoolConnection;
 use sqlx::Postgres;
+
+#[derive(Serialize, Deserialize)]
+pub struct LatestSystemInfo {
+    pub system_info: SystemInformation,
+}
 
 #[get("/system-info/<profile_id>")]
 pub async fn get_latest_entry(
     _a_key: ApiKey<'_>,
-    _p_key: ProfileKey<'_>,
+    _r_key: ReadKey<'_>,
     mut db: Connection<MonitoringDb>,
     profile_id: u32,
-) -> Status {
-    Status::NotImplemented
+) -> Result<Json<LatestSystemInfo>, Status> {
+    Err(Status::NotImplemented)
 }
 
 #[post("/system-info/<profile_id>", data = "<info>")]

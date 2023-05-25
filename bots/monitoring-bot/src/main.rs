@@ -6,6 +6,7 @@ use serenity::{prelude::GatewayIntents, Client};
 use tracing::{instrument, log::error};
 
 mod config;
+mod commands;
 
 #[tokio::main]
 #[instrument]

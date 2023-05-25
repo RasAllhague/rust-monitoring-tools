@@ -42,9 +42,9 @@ impl AppConfigurations {
         let server_url =
             env::var("MONITORING_SERVER_URL").expect("Expected server url in environment!");
         let api_token =
-            env::var("MONITORING_API_TOKEN").expect("Expected api token in environment!");
+            env::var("MONITORING_API_KEY").expect("Expected api token in environment!");
         let read_token =
-            env::var("MONITORING_READ_TOKEN").expect("Expected read token in environment!");
+            env::var("MONITORING_READ_KEY").expect("Expected read key in environment!");
 
         AppConfigurations {
             bot_token: token,

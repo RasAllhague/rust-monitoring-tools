@@ -2124,6 +2124,7 @@ dependencies = [
  "chrono",
  "rocket",
  "rocket_db_pools",
+ "serde",
  "sqlx",
 ]
 

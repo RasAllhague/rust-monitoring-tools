@@ -122,6 +122,9 @@ async fn post_system_info(
                 if let Err(why) = client.post_sys_info(info).await {
                     error!("Failed to post system information, error: {:?}", why);
                 }
+                else {
+                    info!("Successfully send system information for profile {}", client_config.profile_id);
+                }
             }
             Err(why) => error!("Failed to get server version, error: {:?}", why),
         }

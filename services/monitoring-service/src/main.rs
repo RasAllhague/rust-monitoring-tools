@@ -5,6 +5,7 @@ use std::env;
 
 use rocket::{get, launch, routes};
 use rocket_db_pools::Database;
+use service_info::{get_latest_entry, save_system_info};
 use service_lib::api_key::ApiKeyVault;
 use service_lib::database::MonitoringDb;
 
@@ -20,5 +21,13 @@ fn rocket() -> _ {
     rocket::build()
         .manage(ApiKeyVault::new(&api_key))
         .attach(MonitoringDb::init())
-        .mount("/", routes![self::error_log::save_error, self::service_info::save_system_info, get_version])
+        .mount(
+            "/",
+            routes![
+                get_version,
+                self::error_log::save_error,
+                save_system_info,
+                get_latest_entry
+            ],
+        )
 }

@@ -25,7 +25,7 @@ use sqlx::pool::PoolConnection;
 use sqlx::Postgres;
 
 #[get("/system-info/<profile_id>")]
-fn get_latest_entry(
+pub async fn get_latest_entry(
     _a_key: ApiKey<'_>,
     _p_key: ProfileKey<'_>,
     mut db: Connection<MonitoringDb>,

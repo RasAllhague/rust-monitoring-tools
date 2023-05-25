@@ -2,7 +2,7 @@ mod client;
 mod config;
 mod error;
 
-use std::{path::Path, env};
+use std::{env, path::Path};
 
 use chrono::Local;
 use clap::Parser;
@@ -12,19 +12,20 @@ use env_logger::Builder;
 use error::CliError;
 use log::{error, info, warn, LevelFilter};
 use monitoring_core::{models::SystemInformation, options::CollectorOptions};
+use std::io::Write;
 use systemstat::{Duration, Platform, System};
 use tokio::time::sleep;
-use std::io::Write;
 
 pub static CONFIG_FILE_PATH: &str = "./config.json";
 
 #[tokio::main]
 async fn main() -> Result<(), CliError> {
     let cli = Cli::parse();
-    
+
     Builder::new()
         .format(|buf, record| {
-            writeln!(buf,
+            writeln!(
+                buf,
                 "[{}] [{}] - {}",
                 Local::now().format("%Y-%m-%dT%H:%M:%S"),
                 record.level(),
@@ -121,9 +122,11 @@ async fn post_system_info(
 
                 if let Err(why) = client.post_sys_info(info).await {
                     error!("Failed to post system information, error: {:?}", why);
-                }
-                else {
-                    info!("Successfully send system information for profile {}", client_config.profile_id);
+                } else {
+                    info!(
+                        "Successfully send system information for profile {}",
+                        client_config.profile_id
+                    );
                 }
             }
             Err(why) => error!("Failed to get server version, error: {:?}", why),
@@ -143,7 +146,12 @@ async fn configure(
 ) -> Result<(), CliError> {
     if !Path::new(CONFIG_FILE_PATH).exists() {
         let new_config = CliConfig {
-            client: ClientConfig { api_key: String::new(), profile_key: String::new(), profile_id: 0, server_url: String::new() }
+            client: ClientConfig {
+                api_key: String::new(),
+                profile_key: String::new(),
+                profile_id: 0,
+                server_url: String::new(),
+            },
         };
 
         new_config.save(CONFIG_FILE_PATH).await?;

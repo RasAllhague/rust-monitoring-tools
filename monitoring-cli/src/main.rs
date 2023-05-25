@@ -81,14 +81,14 @@ async fn run(run_opt: RunOpt) -> Result<(), CliError> {
 async fn run_normal(options: CollectorOptions) -> Result<(), CliError> {
     let cli_config = CliConfig::load(CONFIG_FILE_PATH).await?;
 
-    post_system_info(&options, &cli_config.client).await
+    post_system_info(&options, &cli_config.client, cli_config.profile_id, &cli_config.profile_key).await
 }
 
 async fn run_service(options: CollectorOptions, sleep_interval: u64) -> Result<(), CliError> {
     let cli_config = CliConfig::load(CONFIG_FILE_PATH).await?;
 
     loop {
-        post_system_info(&options, &cli_config.client).await?;
+        post_system_info(&options, &cli_config.client, cli_config.profile_id, &cli_config.profile_key).await?;
 
         sleep(Duration::from_secs(sleep_interval)).await;
     }
@@ -97,6 +97,8 @@ async fn run_service(options: CollectorOptions, sleep_interval: u64) -> Result<(
 async fn post_system_info(
     options: &CollectorOptions,
     client_config: &ClientConfig,
+    profile_id: i32,
+    profile_key: &str,
 ) -> Result<(), CliError> {
     let system = System::new();
     let hostname = hostname::get().map_err(|x| CliError::Io(x))?;
@@ -118,12 +120,12 @@ async fn post_system_info(
 
                 info!("Server version: {version}");
 
-                if let Err(why) = client.post_sys_info(info).await {
+                if let Err(why) = client.post_sys_info(profile_id, profile_key, info).await {
                     error!("Failed to post system information, error: {:?}", why);
                 } else {
                     info!(
                         "Successfully send system information for profile {}",
-                        client_config.profile_id
+                        profile_id
                     );
                 }
             }
@@ -145,11 +147,11 @@ async fn configure(
     if !Path::new(CONFIG_FILE_PATH).exists() {
         let new_config = CliConfig {
             client: ClientConfig {
-                api_key: String::new(),
-                profile_key: String::new(),
-                profile_id: 0,
                 server_url: String::new(),
+                api_key: String::new(),
             },
+            profile_id: 0,
+            profile_key: String::new(),
         };
 
         new_config.save(CONFIG_FILE_PATH).await?;
@@ -161,10 +163,10 @@ async fn configure(
         cli_config.client.api_key = api_key;
     }
     if let Some(profile_key) = profile_key {
-        cli_config.client.profile_key = profile_key;
+        cli_config.profile_key = profile_key;
     }
     if let Some(profile_id) = profile_id {
-        cli_config.client.profile_id = profile_id;
+        cli_config.profile_id = profile_id as i32;
     }
     if let Some(server_url) = server_url {
         cli_config.client.server_url = server_url;

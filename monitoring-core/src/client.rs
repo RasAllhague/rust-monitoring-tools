@@ -1,7 +1,7 @@
 use reqwest::StatusCode;
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
-use crate::{ErrorLog, models::SystemInformation};
+use crate::{api::models::InsertDeviceProfile, models::SystemInformation, ErrorLog};
 
 pub struct SysInfoClient {
     config: ClientConfig,
@@ -15,9 +15,16 @@ pub enum ClientError {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ClientConfig {
     pub api_key: String,
-    pub profile_key: String,
-    pub profile_id: u32,
     pub server_url: String,
+}
+
+impl ClientConfig {
+    pub fn new(api_key: &str, server_url: &str) -> Self {
+        Self {
+            api_key: String::from(api_key),
+            server_url: String::from(server_url),
+        }
+    }
 }
 
 impl SysInfoClient {
@@ -29,7 +36,6 @@ impl SysInfoClient {
         let resp = reqwest::Client::new()
             .get(format!("{}/", self.config.server_url))
             .header("x-api-key", self.config.api_key.clone())
-            .header("x-profile-key", self.config.profile_key.clone())
             .send()
             .await
             .map_err(|x| ClientError::Reqwest(x))?;
@@ -40,22 +46,70 @@ impl SysInfoClient {
         Ok((version, status))
     }
 
-    pub async fn post_sys_info(&self, data: SystemInformation) -> Result<StatusCode, ClientError> {
-        self.post("system-info", data).await
+    pub async fn get_profiles(&self, read_key: &str) -> Result<(String, StatusCode), ClientError> {
+        let resp = reqwest::Client::new()
+            .get(format!("{}/", self.config.server_url))
+            .header("x-api-key", self.config.api_key.clone())
+            .header("x-read-key", read_key)
+            .send()
+            .await
+            .map_err(|x| ClientError::Reqwest(x))?;
+
+        let status = resp.status().clone();
+        let version = resp.text().await.map_err(|x| ClientError::Reqwest(x))?;
+
+        Ok((version, status))
     }
 
-    pub async fn post_error_log(&self, data: ErrorLog) -> Result<StatusCode, ClientError> {
-        self.post("error", data).await
+    pub async fn post_profile(
+        &self,
+        data: InsertDeviceProfile,
+    ) -> Result<StatusCode, ClientError> {
+        let resp = reqwest::Client::new()
+            .post(format!("{}/profiles", self.config.server_url))
+            .header("x-api-key", self.config.api_key.clone())
+            .json(&data)
+            .send()
+            .await
+            .map_err(|x| ClientError::Reqwest(x))?;
+
+        Ok(resp.status())
     }
 
-    async fn post<T: Serialize>(&self, sub_path: &str, data: T) -> Result<StatusCode, ClientError> {
+    pub async fn post_sys_info(
+        &self,
+        profile_id: i32,
+        profile_key: &str,
+        data: SystemInformation,
+    ) -> Result<StatusCode, ClientError> {
+        self.post_with_profile_key(profile_id, profile_key, "system-info", data)
+            .await
+    }
+
+    pub async fn post_error_log(
+        &self,
+        profile_id: i32,
+        profile_key: &str,
+        data: ErrorLog,
+    ) -> Result<StatusCode, ClientError> {
+        self.post_with_profile_key(profile_id, profile_key, "error", data)
+            .await
+    }
+
+    async fn post_with_profile_key<T: Serialize>(
+        &self,
+        profile_id: i32,
+        profile_key: &str,
+        sub_path: &str,
+        data: T,
+    ) -> Result<StatusCode, ClientError> {
         let resp = reqwest::Client::new()
             .post(format!(
                 "{}/{}/{}",
-                self.config.server_url, sub_path, self.config.profile_id
+                self.config.server_url, sub_path, profile_id
             ))
             .header("x-api-key", self.config.api_key.clone())
-            .header("x-profile-key", self.config.profile_key.clone())
+            .header("x-profile-key", profile_key)
             .json(&data)
             .send()
             .await

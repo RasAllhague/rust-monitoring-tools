@@ -76,6 +76,8 @@ pub enum RunOpt {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct CliConfig {
     pub client: ClientConfig,
+    pub profile_id: i32,
+    pub profile_key: String,
 }
 
 impl CliConfig {

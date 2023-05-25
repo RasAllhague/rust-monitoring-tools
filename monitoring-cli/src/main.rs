@@ -1,4 +1,3 @@
-mod client;
 mod config;
 mod error;
 
@@ -6,12 +5,11 @@ use std::{env, path::Path};
 
 use chrono::Local;
 use clap::Parser;
-use client::SysInfoClient;
-use config::{Cli, CliConfig, ClientConfig, RunOpt};
+use config::{Cli, CliConfig, RunOpt};
 use env_logger::Builder;
 use error::CliError;
 use log::{error, info, warn, LevelFilter};
-use monitoring_core::{models::SystemInformation, options::CollectorOptions};
+use monitoring_core::{models::SystemInformation, options::CollectorOptions, client::{ClientConfig, SysInfoClient}};
 use std::io::Write;
 use systemstat::{Duration, Platform, System};
 use tokio::time::sleep;

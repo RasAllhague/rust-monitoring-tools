@@ -1,4 +1,5 @@
 use clap::{Parser, Subcommand};
+use monitoring_core::client::ClientConfig;
 use serde::{Deserialize, Serialize};
 use tokio::{
     fs::{self, File},
@@ -75,14 +76,6 @@ pub enum RunOpt {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct CliConfig {
     pub client: ClientConfig,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct ClientConfig {
-    pub api_key: String,
-    pub profile_key: String,
-    pub profile_id: u32,
-    pub server_url: String,
 }
 
 impl CliConfig {

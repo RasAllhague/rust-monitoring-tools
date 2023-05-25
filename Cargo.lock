@@ -1286,6 +1286,7 @@ dependencies = [
  "hostname",
  "log",
  "os_info",
+ "reqwest",
  "serde",
  "systemstat",
 ]

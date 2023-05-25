@@ -13,18 +13,19 @@ impl SysInfoClient {
         Self { config }
     }
 
-    pub async fn get_version(&self) -> Result<String, CliError> {
+    pub async fn get_version(&self) -> Result<(String, StatusCode), CliError> {
         let resp = reqwest::Client::new()
-            .get(format!("{}/version", self.config.server_url))
+            .get(format!("{}/", self.config.server_url))
             .header("x-api-key", self.config.api_key.clone())
             .header("x-profile-key", self.config.profile_key.clone())
             .send()
             .await
             .map_err(|x| CliError::Reqwest(x))?;
 
+        let status = resp.status().clone();
         let version = resp.text().await.map_err(|x| CliError::Reqwest(x))?;
 
-        Ok(version)
+        Ok((version, status))
     }
 
     pub async fn post_sys_info(&self, data: SystemInformation) -> Result<StatusCode, CliError> {
